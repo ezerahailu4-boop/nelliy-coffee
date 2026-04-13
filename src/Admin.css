@@ -250,13 +250,22 @@
 .sat-icon { font-size: 32px; margin-bottom: 10px; }
 .sat-num {
   font-family: 'Playfair Display', serif;
-  font-size: 48px;
+  font-size: 56px;
   color: #fdf6ee;
   line-height: 1;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
-.sat-label { font-size: 14px; font-weight: 600; color: rgba(253,246,238,0.7); margin-bottom: 4px; }
-.sat-pct { font-size: 12px; color: rgba(253,246,238,0.35); margin-bottom: 14px; }
+.sat-label { font-size: 13px; font-weight: 600; color: rgba(253,246,238,0.5); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.sat-fraction { font-size: 15px; font-weight: 600; color: rgba(253,246,238,0.7); margin-bottom: 10px; }
+.sat-pct-badge {
+  display: inline-block;
+  font-size: 13px; font-weight: 700;
+  padding: 4px 12px; border-radius: 100px;
+  margin-bottom: 14px;
+}
+.sat-pct-green { background: rgba(34,197,94,0.15); color: #22c55e; }
+.sat-pct-red { background: rgba(239,68,68,0.15); color: #ef4444; }
+.sat-pct-yellow { background: rgba(245,158,11,0.15); color: #f59e0b; }
 .sat-bar-track { height: 5px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; }
 .sat-bar-fill { height: 100%; border-radius: 100px; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
 

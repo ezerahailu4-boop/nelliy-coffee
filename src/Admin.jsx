@@ -308,7 +308,8 @@ export default function Admin() {
                 <div className="sat-icon">😊</div>
                 <div className="sat-num">{satisfiedCount}</div>
                 <div className="sat-label">Satisfied</div>
-                <div className="sat-pct">{satisfaction}% of total</div>
+                <div className="sat-fraction">{satisfiedCount} out of {total}</div>
+                <div className="sat-pct-badge sat-pct-green">{satisfaction}%</div>
                 <div className="sat-bar-track">
                   <div className="sat-bar-fill" style={{ width: `${satisfaction}%`, background: '#22c55e' }} />
                 </div>
@@ -317,7 +318,8 @@ export default function Admin() {
                 <div className="sat-icon">😞</div>
                 <div className="sat-num">{unsatisfiedCount}</div>
                 <div className="sat-label">Unsatisfied</div>
-                <div className="sat-pct">{total ? Math.round(unsatisfiedCount / total * 100) : 0}% of total</div>
+                <div className="sat-fraction">{unsatisfiedCount} out of {total}</div>
+                <div className="sat-pct-badge sat-pct-red">{total ? Math.round(unsatisfiedCount / total * 100) : 0}%</div>
                 <div className="sat-bar-track">
                   <div className="sat-bar-fill" style={{ width: `${total ? Math.round(unsatisfiedCount / total * 100) : 0}%`, background: '#ef4444' }} />
                 </div>
@@ -326,7 +328,8 @@ export default function Admin() {
                 <div className="sat-icon">😐</div>
                 <div className="sat-num">{total - satisfiedCount - unsatisfiedCount}</div>
                 <div className="sat-label">Neutral</div>
-                <div className="sat-pct">{total ? Math.round((total - satisfiedCount - unsatisfiedCount) / total * 100) : 0}% of total</div>
+                <div className="sat-fraction">{total - satisfiedCount - unsatisfiedCount} out of {total}</div>
+                <div className="sat-pct-badge sat-pct-yellow">{total ? Math.round((total - satisfiedCount - unsatisfiedCount) / total * 100) : 0}%</div>
                 <div className="sat-bar-track">
                   <div className="sat-bar-fill" style={{ width: `${total ? Math.round((total - satisfiedCount - unsatisfiedCount) / total * 100) : 0}%`, background: '#f59e0b' }} />
                 </div>
