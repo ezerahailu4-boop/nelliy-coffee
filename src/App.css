@@ -19,7 +19,7 @@ body {
   font-family: 'Inter', sans-serif;
   background:
     linear-gradient(135deg, rgba(44,26,14,0.82) 0%, rgba(74,44,23,0.78) 40%, rgba(122,74,42,0.75) 100%),
-    url('https://images7.alphacoders.com/721/thumb-1920-721191.jpg') center/cover no-repeat fixed;
+    url('/src/assets/bg.jpg') center/cover no-repeat fixed;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -403,6 +403,7 @@ input:focus, textarea:focus {
   .card { padding: 28px 20px; border-radius: 18px; }
   .header h1 { font-size: 24px; }
   .chip { padding: 8px 12px; font-size: 12px; }
+  .info-row { flex-direction: column; }
   .summary-row { flex-direction: column; gap: 4px; }
   .summary-a { text-align: left; }
   .btn { font-size: 14px; padding: 13px; }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { supabase } from './supabase'
 import logo from './assets/Nelliys Logo.png'
 import {
@@ -75,9 +75,10 @@ function buildTrendData(feedback) {
 }
 
 function exportCSV(feedback) {
-  const headers = ['Date', ...QUESTIONS.map(q => q.label), 'Liked', 'Improve']
+  const headers = ['Date', 'Name', 'Table', ...QUESTIONS.map(q => q.label), 'Liked', 'Improve']
   const rows = feedback.map(f => [
     new Date(f.created_at).toLocaleString(),
+    f.name || '', f.table_number || '',
     ...QUESTIONS.map(q => f[q.key] || ''),
     f.liked || '', f.improve || ''
   ])
@@ -100,9 +101,12 @@ export default function Admin() {
   const [tab, setTab] = useState('dashboard')
   const [search, setSearch] = useState('')
   const [filterRating, setFilterRating] = useState('All')
-  const [dateRange, setDateRange] = useState('all')
+  const [dashDateRange, setDashDateRange] = useState('all')
+  const [respDateRange, setRespDateRange] = useState('all')
   const [deleteId, setDeleteId] = useState(null)
   const [showQR, setShowQR] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [unsatShowAll, setUnsatShowAll] = useState(false)
   const qrRef = useRef()
   const inactiveTimer = useRef(null)
 
@@ -125,6 +129,7 @@ export default function Admin() {
   }, [session])
 
   const surveyUrl = window.location.origin + '/'
+  const closeSidebar = () => setSidebarOpen(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -204,12 +209,12 @@ export default function Admin() {
 
   // Filter feedback by date range
   const now = new Date()
-  const filtered = feedback.filter(f => {
+  const filtered = useMemo(() => feedback.filter(f => {
     const d = new Date(f.created_at)
-    if (dateRange === '7d') return (now - d) / 86400000 <= 7
-    if (dateRange === '30d') return (now - d) / 86400000 <= 30
+    if (dashDateRange === '7d') return (now - d) / 86400000 <= 7
+    if (dashDateRange === '30d') return (now - d) / 86400000 <= 30
     return true
-  })
+  }), [feedback, dashDateRange])
 
   // Stats
   const total = filtered.length
@@ -228,14 +233,29 @@ export default function Admin() {
     score: total ? Math.round(filtered.reduce((s, f) => s + scoreOf(f[q.key]), 0) / total) : 0
   }))
 
-  const trendData = buildTrendData(filtered)
+  const trendData = useMemo(() => buildTrendData(filtered), [filtered])
+
+  const tallyCache = useMemo(() => ({
+    overall: tally(filtered, 'overall'),
+    recommend: tally(filtered, 'recommend'),
+    coffee: tally(filtered, 'coffee'),
+    service: tally(filtered, 'service'),
+    wait: tally(filtered, 'wait'),
+  }), [filtered])
 
   // Responses tab filtering
-  const respFiltered = filtered.filter(f => {
+  const respBase = useMemo(() => feedback.filter(f => {
+    const d = new Date(f.created_at)
+    if (respDateRange === '7d') return (now - d) / 86400000 <= 7
+    if (respDateRange === '30d') return (now - d) / 86400000 <= 30
+    return true
+  }), [feedback, respDateRange])
+
+  const respFiltered = useMemo(() => respBase.filter(f => {
     const matchSearch = search === '' || Object.values(f).some(v => String(v).toLowerCase().includes(search.toLowerCase()))
     const matchRating = filterRating === 'All' || f.overall === filterRating
     return matchSearch && matchRating
-  })
+  }), [respBase, search, filterRating])
 
   const TABS = [
     { id: 'dashboard', icon: '▦', label: 'Dashboard' },
@@ -245,7 +265,10 @@ export default function Admin() {
 
   return (
     <div className="adm-page">
-      <aside className="adm-sidebar">
+      {/* Mobile overlay */}
+      {sidebarOpen && <div className="adm-overlay" onClick={closeSidebar} />}
+
+      <aside className={`adm-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="adm-sidebar-brand">
           <img src={logo} alt="Nelliy's Coffee" className="adm-sidebar-logo" />
           <div>
@@ -255,7 +278,7 @@ export default function Admin() {
         </div>
         <nav className="adm-nav">
           {TABS.map(n => (
-            <button key={n.id} className={`adm-nav-item ${tab === n.id ? 'active' : ''}`} onClick={() => setTab(n.id)}>
+            <button key={n.id} className={`adm-nav-item ${tab === n.id ? 'active' : ''}`} onClick={() => { setTab(n.id); closeSidebar() }}>
               <span className="adm-nav-icon">{n.icon}</span>
               <span>{n.label}</span>
               {n.id === 'responses' && total > 0 && <span className="adm-nav-badge">{total}</span>}
@@ -270,15 +293,18 @@ export default function Admin() {
 
       <main className="adm-main">
         <div className="adm-topbar">
-          <div>
-            <h2 className="adm-page-title">
-              {tab === 'dashboard' ? 'Dashboard' : tab === 'responses' ? 'Responses' : 'QR Code'}
-            </h2>
-            <p className="adm-page-sub">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button className="adm-hamburger" onClick={() => setSidebarOpen(o => !o)}>☰</button>
+            <div>
+              <h2 className="adm-page-title">
+                {tab === 'dashboard' ? 'Dashboard' : tab === 'responses' ? 'Responses' : 'QR Code'}
+              </h2>
+              <p className="adm-page-sub">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
           </div>
           <div className="adm-topbar-actions">
             {tab === 'dashboard' && (
-              <select className="adm-select" value={dateRange} onChange={e => setDateRange(e.target.value)}>
+              <select className="adm-select" value={dashDateRange} onChange={e => setDashDateRange(e.target.value)}>
                 <option value="all">All Time</option>
                 <option value="30d">Last 30 Days</option>
                 <option value="7d">Last 7 Days</option>
@@ -294,6 +320,14 @@ export default function Admin() {
         {/* ── DASHBOARD ── */}
         {tab === 'dashboard' && (
           <div className="adm-dashboard">
+            {total === 0 ? (
+              <div className="adm-empty-state">
+                <div className="adm-empty-icon">☕</div>
+                <h3>No feedback yet</h3>
+                <p>Share the QR code with your customers to start collecting responses.</p>
+                <button className="adm-refresh" onClick={() => setTab('qr')}>View QR Code →</button>
+              </div>
+            ) : (<>
             <div className="kpi-row">
               <KpiCard icon="📋" label="Total Responses" value={total} color="#c8813a" />
               <KpiCard icon="😊" label="Satisfaction" value={`${satisfaction}%`} sub="Excellent + Good" color="#22c55e" />
@@ -341,7 +375,7 @@ export default function Admin() {
               <div className="chart-card">
                 <div className="chart-title">⚠️ Unsatisfied Customers — Reasons</div>
                 <div className="unsat-list">
-                  {unsatisfiedList.map((f, i) => (
+                  {(unsatShowAll ? unsatisfiedList : unsatisfiedList.slice(0, 5)).map((f, i) => (
                     <div key={f.id} className="unsat-item">
                       <div className="unsat-header">
                         <span className="unsat-num">#{i + 1}</span>
@@ -370,6 +404,11 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
+                {unsatisfiedList.length > 5 && (
+                  <button className="adm-show-more" onClick={() => setUnsatShowAll(v => !v)}>
+                    {unsatShowAll ? '▲ Show less' : `▼ Show ${unsatisfiedList.length - 5} more`}
+                  </button>
+                )}
               </div>
             )}
 
@@ -403,8 +442,8 @@ export default function Admin() {
                 <div className="chart-title">Overall Experience</div>
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={tally(filtered, 'overall')} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
-                      {tally(filtered, 'overall').map((d, i) => <Cell key={i} fill={SENTIMENT[d.name] || '#94a3b8'} />)}
+                    <Pie data={tallyCache.overall} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
+                      {tallyCache.overall.map((d, i) => <Cell key={i} fill={SENTIMENT[d.name] || '#94a3b8'} />)}
                     </Pie>
                     <Tooltip contentStyle={{ background: '#2c1a0e', border: '1px solid rgba(200,129,58,0.3)', borderRadius: 10, color: '#fdf6ee' }} formatter={v => [`${v} responses`]} />
                     <Legend iconType="circle" iconSize={8} />
@@ -415,8 +454,8 @@ export default function Admin() {
                 <div className="chart-title">Would Recommend?</div>
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={tally(filtered, 'recommend')} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
-                      {tally(filtered, 'recommend').map((d, i) => <Cell key={i} fill={SENTIMENT[d.name] || '#94a3b8'} />)}
+                    <Pie data={tallyCache.recommend} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
+                      {tallyCache.recommend.map((d, i) => <Cell key={i} fill={SENTIMENT[d.name] || '#94a3b8'} />)}
                     </Pie>
                     <Tooltip contentStyle={{ background: '#2c1a0e', border: '1px solid rgba(200,129,58,0.3)', borderRadius: 10, color: '#fdf6ee' }} formatter={v => [`${v} responses`]} />
                     <Legend iconType="circle" iconSize={8} />
@@ -430,12 +469,12 @@ export default function Admin() {
                 <div key={key} className="chart-card">
                   <div className="chart-title">{title}</div>
                   <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={tally(filtered, key)} barSize={28}>
+                    <BarChart data={tallyCache[key]} barSize={28}>
                       <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'rgba(253,246,238,0.5)' }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fontSize: 11, fill: 'rgba(253,246,238,0.5)' }} axisLine={false} tickLine={false} />
                       <Tooltip contentStyle={{ background: '#2c1a0e', border: '1px solid rgba(200,129,58,0.3)', borderRadius: 10, color: '#fdf6ee' }} cursor={{ fill: 'rgba(200,129,58,0.06)' }} />
                       <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                        {tally(filtered, key).map((d, i) => <Cell key={i} fill={SENTIMENT[d.name] || '#c8813a'} />)}
+                        {tallyCache[key].map((d, i) => <Cell key={i} fill={SENTIMENT[d.name] || '#c8813a'} />)}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -457,6 +496,7 @@ export default function Admin() {
                 ))}
               </div>
             </div>
+          </>)}
           </div>
         )}
 
@@ -472,7 +512,7 @@ export default function Admin() {
                 <option value="All">All Ratings</option>
                 {['Excellent', 'Good', 'Average', 'Poor'].map(r => <option key={r}>{r}</option>)}
               </select>
-              <select className="adm-select" value={dateRange} onChange={e => setDateRange(e.target.value)}>
+              <select className="adm-select" value={respDateRange} onChange={e => setRespDateRange(e.target.value)}>
                 <option value="all">All Time</option>
                 <option value="30d">Last 30 Days</option>
                 <option value="7d">Last 7 Days</option>

@@ -43,6 +43,7 @@ export default function App() {
     setLoading(false)
     if (error) { setError('Failed to submit. Please try again.'); return }
     setSubmitted(true)
+    window.scrollTo(0, 0)
   }
 
   if (submitted) {
@@ -63,7 +64,7 @@ export default function App() {
             {form.liked && <div className="summary-row"><span className="summary-q">What you liked</span><span className="summary-a neutral">{form.liked}</span></div>}
             {form.improve && <div className="summary-row"><span className="summary-q">Improvement suggestion</span><span className="summary-a neutral">{form.improve}</span></div>}
           </div>
-          <button className="btn" onClick={() => { setForm({ ...initialForm, liked: '', improve: '', name: '', table_number: '' }); setSubmitted(false) }}>
+          <button className="btn" onClick={() => { setForm({ ...initialForm, liked: '', improve: '', name: '', table_number: '' }); setSubmitted(false); window.scrollTo(0, 0) }}>
             Submit Another
           </button>
         </div>
@@ -120,12 +121,12 @@ export default function App() {
 
             <div className="q-block fade-in">
               <p className="q-label"><span className="q-num">8</span>What did you like most? <span className="optional">(Optional)</span></p>
-              <textarea rows={3} placeholder="Tell us what you loved..." value={form.liked} onChange={e => set('liked', e.target.value)} />
+              <textarea rows={3} placeholder="Tell us what you loved..." value={form.liked} onChange={e => set('liked', e.target.value)} maxLength={500} />
             </div>
 
             <div className="q-block fade-in">
               <p className="q-label"><span className="q-num">9</span>What can we improve? <span className="optional">(Optional)</span></p>
-              <textarea rows={3} placeholder="Your suggestions help us grow..." value={form.improve} onChange={e => set('improve', e.target.value)} />
+              <textarea rows={3} placeholder="Your suggestions help us grow..." value={form.improve} onChange={e => set('improve', e.target.value)} maxLength={500} />
             </div>
           </div>
 

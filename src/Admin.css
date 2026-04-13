@@ -8,7 +8,7 @@
   display: flex; align-items: center; justify-content: center;
   background:
     linear-gradient(135deg, rgba(15,10,5,0.92) 0%, rgba(44,26,14,0.88) 100%),
-    url('https://images7.alphacoders.com/721/thumb-1920-721191.jpg') center/cover no-repeat fixed;
+    url('/src/assets/bg.jpg') center/cover no-repeat fixed;
   font-family: 'Inter', sans-serif;
   padding: 24px;
 }
@@ -468,7 +468,16 @@
 @media (max-width: 1100px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
 
 @media (max-width: 900px) {
-  .adm-sidebar { display: none; }
+  .adm-sidebar {
+    position: fixed; top: 0; left: 0; height: 100vh; z-index: 200;
+    transform: translateX(-100%); transition: transform 0.25s ease;
+    display: flex;
+  }
+  .adm-sidebar.open { transform: translateX(0); }
+  .adm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 199;
+  }
+  .adm-hamburger { display: flex; }
   .charts-row { grid-template-columns: 1fr; }
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .adm-dashboard, .adm-responses, .adm-qr-page { padding: 0 16px 32px; }
@@ -485,3 +494,34 @@
   .qr-card { border: none; box-shadow: none; background: white; color: black; }
   .qr-header h2, .qr-header p, .qr-hint { color: black; }
 }
+
+/* ── Hamburger ── */
+.adm-hamburger {
+  display: none;
+  align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04); color: rgba(253,246,238,0.7);
+  font-size: 16px; cursor: pointer; flex-shrink: 0;
+}
+.adm-hamburger:hover { background: rgba(200,129,58,0.1); color: #c8813a; }
+
+/* ── Empty state ── */
+.adm-empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 80px 24px; text-align: center; gap: 12px;
+}
+.adm-empty-icon { font-size: 56px; margin-bottom: 4px; }
+.adm-empty-state h3 { font-family: 'Playfair Display', serif; font-size: 22px; color: #fdf6ee; }
+.adm-empty-state p { font-size: 14px; color: rgba(253,246,238,0.4); max-width: 320px; line-height: 1.6; }
+
+/* ── Show more ── */
+.adm-show-more {
+  display: block; width: 100%; margin-top: 12px;
+  padding: 10px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: transparent; color: rgba(253,246,238,0.4);
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  cursor: pointer; transition: all 0.2s;
+}
+.adm-show-more:hover { background: rgba(255,255,255,0.04); color: rgba(253,246,238,0.7); }
