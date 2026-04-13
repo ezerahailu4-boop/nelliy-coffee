@@ -213,7 +213,11 @@ export default function Admin() {
 
   // Stats
   const total = filtered.length
-  const satisfaction = total ? Math.round(filtered.filter(f => ['Excellent', 'Good'].includes(f.overall)).length / total * 100) : 0
+  const satisfiedList = filtered.filter(f => ['Excellent', 'Good'].includes(f.overall))
+  const unsatisfiedList = filtered.filter(f => ['Average', 'Poor'].includes(f.overall))
+  const satisfiedCount = satisfiedList.length
+  const unsatisfiedCount = unsatisfiedList.length
+  const satisfaction = total ? Math.round(satisfiedCount / total * 100) : 0
   const recommendRate = total ? Math.round(filtered.filter(f => f.recommend === 'Yes').length / total * 100) : 0
   const avgScore = total ? Math.round(QUESTIONS.reduce((sum, q) => sum + filtered.reduce((s, f) => s + scoreOf(f[q.key]), 0) / total, 0) / QUESTIONS.length) : 0
   const today = new Date().toDateString()
@@ -297,6 +301,74 @@ export default function Admin() {
               <KpiCard icon="⭐" label="Avg Score" value={`${avgScore}%`} sub="All categories" color="#f59e0b" />
               <KpiCard icon="📅" label="Today" value={todayCount} sub="New responses" color="#ec4899" />
             </div>
+
+            {/* Satisfaction breakdown */}
+            <div className="sat-breakdown">
+              <div className="sat-card sat-happy">
+                <div className="sat-icon">😊</div>
+                <div className="sat-num">{satisfiedCount}</div>
+                <div className="sat-label">Satisfied</div>
+                <div className="sat-pct">{satisfaction}% of total</div>
+                <div className="sat-bar-track">
+                  <div className="sat-bar-fill" style={{ width: `${satisfaction}%`, background: '#22c55e' }} />
+                </div>
+              </div>
+              <div className="sat-card sat-sad">
+                <div className="sat-icon">😞</div>
+                <div className="sat-num">{unsatisfiedCount}</div>
+                <div className="sat-label">Unsatisfied</div>
+                <div className="sat-pct">{total ? Math.round(unsatisfiedCount / total * 100) : 0}% of total</div>
+                <div className="sat-bar-track">
+                  <div className="sat-bar-fill" style={{ width: `${total ? Math.round(unsatisfiedCount / total * 100) : 0}%`, background: '#ef4444' }} />
+                </div>
+              </div>
+              <div className="sat-card sat-neutral">
+                <div className="sat-icon">😐</div>
+                <div className="sat-num">{total - satisfiedCount - unsatisfiedCount}</div>
+                <div className="sat-label">Neutral</div>
+                <div className="sat-pct">{total ? Math.round((total - satisfiedCount - unsatisfiedCount) / total * 100) : 0}% of total</div>
+                <div className="sat-bar-track">
+                  <div className="sat-bar-fill" style={{ width: `${total ? Math.round((total - satisfiedCount - unsatisfiedCount) / total * 100) : 0}%`, background: '#f59e0b' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Unsatisfied reasons */}
+            {unsatisfiedList.length > 0 && (
+              <div className="chart-card">
+                <div className="chart-title">⚠️ Unsatisfied Customers — Reasons</div>
+                <div className="unsat-list">
+                  {unsatisfiedList.map((f, i) => (
+                    <div key={f.id} className="unsat-item">
+                      <div className="unsat-header">
+                        <span className="unsat-num">#{i + 1}</span>
+                        <span className="unsat-date">{new Date(f.created_at).toLocaleString()}</span>
+                        {f.name && <span className="unsat-name">{f.name}{f.table_number ? ` · Table ${f.table_number}` : ''}</span>}
+                        <Badge value={f.overall} />
+                      </div>
+                      <div className="unsat-reasons">
+                        {QUESTIONS.filter(q => ['Poor', 'Needs Improvement', 'Too Long', 'No'].includes(f[q.key])).map(q => (
+                          <div key={q.key} className="unsat-reason-row">
+                            <span className="unsat-reason-icon">{q.icon}</span>
+                            <span className="unsat-reason-label">{q.label}</span>
+                            <Badge value={f[q.key]} />
+                          </div>
+                        ))}
+                        {f.improve && (
+                          <div className="unsat-comment">
+                            <span>🔧</span>
+                            <p>{f.improve}</p>
+                          </div>
+                        )}
+                        {!QUESTIONS.some(q => ['Poor', 'Needs Improvement', 'Too Long', 'No'].includes(f[q.key])) && !f.improve && (
+                          <p className="unsat-no-reason">No specific reason provided</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Trend line */}
             <div className="chart-card chart-wide">
