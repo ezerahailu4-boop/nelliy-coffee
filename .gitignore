@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Large files
+*.exe
+*.dmg
+*.zip
+
 # Environment variables
 .env
 .env.*
