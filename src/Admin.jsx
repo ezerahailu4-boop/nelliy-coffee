@@ -180,6 +180,39 @@ export default function Admin() {
     a.click()
   }
 
+  // All hooks must be before any early return
+  const now = new Date()
+
+  const filtered = useMemo(() => feedback.filter(f => {
+    const d = new Date(f.created_at)
+    if (dashDateRange === '7d') return (now - d) / 86400000 <= 7
+    if (dashDateRange === '30d') return (now - d) / 86400000 <= 30
+    return true
+  }), [feedback, dashDateRange])
+
+  const trendData = useMemo(() => buildTrendData(filtered), [filtered])
+
+  const tallyCache = useMemo(() => ({
+    overall: tally(filtered, 'overall'),
+    recommend: tally(filtered, 'recommend'),
+    coffee: tally(filtered, 'coffee'),
+    service: tally(filtered, 'service'),
+    wait: tally(filtered, 'wait'),
+  }), [filtered])
+
+  const respBase = useMemo(() => feedback.filter(f => {
+    const d = new Date(f.created_at)
+    if (respDateRange === '7d') return (now - d) / 86400000 <= 7
+    if (respDateRange === '30d') return (now - d) / 86400000 <= 30
+    return true
+  }), [feedback, respDateRange])
+
+  const respFiltered = useMemo(() => respBase.filter(f => {
+    const matchSearch = search === '' || Object.values(f).some(v => String(v).toLowerCase().includes(search.toLowerCase()))
+    const matchRating = filterRating === 'All' || f.overall === filterRating
+    return matchSearch && matchRating
+  }), [respBase, search, filterRating])
+
   if (!session) {
     return (
       <div className="adm-login-bg">
@@ -207,15 +240,6 @@ export default function Admin() {
     )
   }
 
-  // Filter feedback by date range
-  const now = new Date()
-  const filtered = useMemo(() => feedback.filter(f => {
-    const d = new Date(f.created_at)
-    if (dashDateRange === '7d') return (now - d) / 86400000 <= 7
-    if (dashDateRange === '30d') return (now - d) / 86400000 <= 30
-    return true
-  }), [feedback, dashDateRange])
-
   // Stats
   const total = filtered.length
   const satisfiedList = filtered.filter(f => ['Excellent', 'Good'].includes(f.overall))
@@ -232,30 +256,6 @@ export default function Admin() {
     label: q.label,
     score: total ? Math.round(filtered.reduce((s, f) => s + scoreOf(f[q.key]), 0) / total) : 0
   }))
-
-  const trendData = useMemo(() => buildTrendData(filtered), [filtered])
-
-  const tallyCache = useMemo(() => ({
-    overall: tally(filtered, 'overall'),
-    recommend: tally(filtered, 'recommend'),
-    coffee: tally(filtered, 'coffee'),
-    service: tally(filtered, 'service'),
-    wait: tally(filtered, 'wait'),
-  }), [filtered])
-
-  // Responses tab filtering
-  const respBase = useMemo(() => feedback.filter(f => {
-    const d = new Date(f.created_at)
-    if (respDateRange === '7d') return (now - d) / 86400000 <= 7
-    if (respDateRange === '30d') return (now - d) / 86400000 <= 30
-    return true
-  }), [feedback, respDateRange])
-
-  const respFiltered = useMemo(() => respBase.filter(f => {
-    const matchSearch = search === '' || Object.values(f).some(v => String(v).toLowerCase().includes(search.toLowerCase()))
-    const matchRating = filterRating === 'All' || f.overall === filterRating
-    return matchSearch && matchRating
-  }), [respBase, search, filterRating])
 
   const TABS = [
     { id: 'dashboard', icon: '▦', label: 'Dashboard' },
