@@ -323,6 +323,11 @@ input:focus, textarea:focus {
 .btn-submit {
   background: linear-gradient(135deg, var(--brown), var(--espresso));
   box-shadow: 0 4px 16px rgba(44,26,14,0.35);
+  display: block;
+  width: 60%;
+  margin: 0 auto;
+  padding: 17px;
+  font-size: 16px;
 }
 
 /* Success */
