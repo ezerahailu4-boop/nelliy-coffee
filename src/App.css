@@ -55,6 +55,40 @@ body {
   margin-bottom: 28px;
 }
 
+/* Language toggle */
+.lang-toggle-wrap {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.lang-btn {
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: 1.5px solid var(--latte);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.3px;
+}
+
+.lang-btn:hover {
+  border-color: var(--caramel);
+  color: var(--caramel);
+}
+
+.lang-btn.active {
+  background: linear-gradient(135deg, var(--caramel), #a0622a);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 2px 8px rgba(200,129,58,0.35);
+}
+
 .logo-img {
   width: 180px;
   height: auto;
