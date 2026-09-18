@@ -6,8 +6,8 @@ import logo from './assets/Nelliys Logo.png'
 const T = {
   en: {
     tagline: 'Addis Ababa · Customer Survey',
-    nameLabel: 'Your Name', tablLabel: 'Table Number', optional: '(Optional)',
-    namePlaceholder: 'e.g. Sara', tablePlaceholder: 'e.g. 4',
+    nameLabel: 'Your Name', tablLabel: 'What did you eat/drink', optional: '(Optional)',
+    namePlaceholder: 'e.g. Sara', tablePlaceholder: 'e.g. Latte, Croissant',
     likedLabel: 'What did you like most?', likedPlaceholder: 'Tell us what you loved...',
     improveLabel: 'What can we improve?', improvePlaceholder: 'Your suggestions help us grow...',
     submit: 'Submit Feedback ✓', submitting: 'Submitting...',
@@ -28,8 +28,8 @@ const T = {
   },
   am: {
     tagline: 'አዲስ አበባ · የደንበኛ አስተያየት',
-    nameLabel: 'ስምዎ', tablLabel: 'የጠረጴዛ ቁጥር', optional: '(አማራጭ)',
-    namePlaceholder: 'ለምሳሌ፡ ሳራ', tablePlaceholder: 'ለምሳሌ፡ 4',
+    nameLabel: 'ስምዎ', tablLabel: 'ምን በሉ/ጠጡ', optional: '(አማራጭ)',
+    namePlaceholder: 'ለምሳሌ፡ ሳራ', tablePlaceholder: 'ለምሳሌ፡ ላቴ፣ ክሮሳን',
     likedLabel: 'በጣም የወደዱት ምንድን ነው?', likedPlaceholder: 'የወደዱትን ይንገሩን...',
     improveLabel: 'ምን ማሻሻል እንዲሻሻል?', improvePlaceholder: 'አስተያየትዎ እንድናድግ ይረዳናል...',
     submit: 'አስተያየት ያስገቡ ✓', submitting: 'በማስገባት ላይ...',
