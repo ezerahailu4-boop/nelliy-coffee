@@ -31,7 +31,7 @@ const T = {
     nameLabel: 'ስምዎ', tablLabel: 'ምን በሉ/ጠጡ', optional: '(አማራጭ)',
     namePlaceholder: 'ለምሳሌ፡ ሳራ', tablePlaceholder: 'ለምሳሌ፡ ላቴ፣ ክሮሳን',
     likedLabel: 'በጣም የወደዱት ምንድን ነው?', likedPlaceholder: 'የወደዱትን ይንገሩን...',
-    improveLabel: 'ምን ማሻሻል እንዲሻሻል?', improvePlaceholder: 'አስተያየትዎ እንድናድግ ይረዳናል...',
+    improveLabel: 'ምን ማሻሻል እንችላለን?', improvePlaceholder: 'አስተያየትዎ እንድናድግ ይረዳናል...',
     submit: 'አስተያየት ያስገቡ ✓', submitting: 'በማስገባት ላይ...',
     remaining: n => `${n} ጥያቄ${n !== 1 ? 'ዎች' : ''} ቀርተዋል`,
     thankYou: name => `አመሰግናለሁ${name ? `፣ ${name}` : ''}!`,
