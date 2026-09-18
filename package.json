@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.102.1",
+    "@neon/config": "^1.7.2",
+    "@neon/env": "^1.4.3",
+    "@neondatabase/serverless": "^0.10.4",
+    "jsonwebtoken": "^9.0.3",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

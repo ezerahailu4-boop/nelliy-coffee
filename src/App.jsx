@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { supabase } from './supabase'
+import { submitFeedback } from './api'
 import logo from './assets/Nelliys Logo.png'
 
 const T = {
@@ -91,9 +91,9 @@ export default function App() {
     if (!allAnswered) return
     setLoading(true)
     setError('')
-    const { error } = await supabase.from('feedback').insert([form])
+    const error = await submitFeedback(form)
     setLoading(false)
-    if (error) { setError('Failed to submit. Please try again.'); return }
+    if (error) { setError(error); return }
     setSubmitted(true)
     window.scrollTo(0, 0)
   }

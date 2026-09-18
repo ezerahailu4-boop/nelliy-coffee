@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { supabase } from './supabase'
+import { adminLogin, fetchFeedback as apiFetchFeedback, deleteFeedback as apiDeleteFeedback } from './api'
 import logo from './assets/Nelliys Logo.png'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer,
@@ -90,8 +90,7 @@ function exportCSV(feedback) {
 }
 
 export default function Admin() {
-  const [session, setSession] = useState(null)
-  const [email, setEmail] = useState('')
+  const [token, setToken] = useState(() => sessionStorage.getItem('admin_token'))
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
@@ -112,13 +111,15 @@ export default function Admin() {
 
   const INACTIVE_MS = 10 * 60 * 1000
 
+  const signOut = () => { sessionStorage.removeItem('admin_token'); setToken(null) }
+
   const resetTimer = () => {
     clearTimeout(inactiveTimer.current)
-    inactiveTimer.current = setTimeout(() => supabase.auth.signOut(), INACTIVE_MS)
+    inactiveTimer.current = setTimeout(signOut, INACTIVE_MS)
   }
 
   useEffect(() => {
-    if (!session) return
+    if (!token) return
     const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart']
     events.forEach(e => window.addEventListener(e, resetTimer))
     resetTimer()
@@ -126,36 +127,27 @@ export default function Admin() {
       clearTimeout(inactiveTimer.current)
       events.forEach(e => window.removeEventListener(e, resetTimer))
     }
-  }, [session])
+  }, [token])
 
   const surveyUrl = window.location.origin + '/'
   const closeSidebar = () => setSidebarOpen(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setSession(s))
-    return () => subscription.unsubscribe()
-  }, [])
+    if (!token) return
+    loadFeedback()
+    const interval = setInterval(loadFeedback, 10000)
+    return () => clearInterval(interval)
+  }, [token])
 
-  useEffect(() => {
-    if (!session) return
-    fetchFeedback()
-    // Real-time subscription
-    const channel = supabase.channel('feedback-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'feedback' }, () => fetchFeedback())
-      .subscribe()
-    return () => supabase.removeChannel(channel)
-  }, [session])
-
-  const fetchFeedback = async () => {
+  const loadFeedback = async () => {
     setLoading(true)
-    const { data } = await supabase.from('feedback').select('*').order('created_at', { ascending: false })
+    const data = await apiFetchFeedback(token)
     setFeedback(data || [])
     setLoading(false)
   }
 
   const handleDelete = async id => {
-    await supabase.from('feedback').delete().eq('id', id)
+    await apiDeleteFeedback(id, token)
     setFeedback(f => f.filter(x => x.id !== id))
     setDeleteId(null)
     setExpanded(null)
@@ -165,9 +157,11 @@ export default function Admin() {
     e.preventDefault()
     setLoginLoading(true)
     setLoginError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { token: t, error } = await adminLogin(password)
     setLoginLoading(false)
-    if (error) setLoginError(error.message)
+    if (error || !t) { setLoginError('Invalid password'); return }
+    sessionStorage.setItem('admin_token', t)
+    setToken(t)
   }
 
   const downloadQR = () => {
@@ -213,7 +207,7 @@ export default function Admin() {
     return matchSearch && matchRating
   }), [respBase, search, filterRating])
 
-  if (!session) {
+  if (!token) {
     return (
       <div className="adm-login-bg">
         <div className="adm-login-card">
@@ -222,10 +216,6 @@ export default function Admin() {
             <p>Admin Dashboard</p>
           </div>
           <form onSubmit={handleLogin} className="adm-login-form">
-            <div className="adm-input-wrap">
-              <span className="adm-input-icon">✉</span>
-              <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required />
-            </div>
             <div className="adm-input-wrap">
               <span className="adm-input-icon">🔒</span>
               <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
@@ -288,7 +278,7 @@ export default function Admin() {
         <div className="adm-sidebar-footer">
           <div className="adm-realtime-dot" /><span>Live updates on</span>
         </div>
-        <button className="adm-signout" onClick={() => supabase.auth.signOut()}>↩ Sign Out</button>
+        <button className="adm-signout" onClick={signOut}>↩ Sign Out</button>
       </aside>
 
       <main className="adm-main">
@@ -313,7 +303,7 @@ export default function Admin() {
             {tab === 'responses' && (
               <button className="adm-export-btn" onClick={() => exportCSV(respFiltered)}>↓ Export CSV</button>
             )}
-            <button className="adm-refresh" onClick={fetchFeedback}>↻ Refresh</button>
+            <button className="adm-refresh" onClick={loadFeedback}>↻ Refresh</button>
           </div>
         </div>
 
