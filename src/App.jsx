@@ -41,7 +41,7 @@ const T = {
     questions: [
       { key: 'overall',     label: 'በአጠቃላይ ተሞክሮዎ እንዴት ይገምግሙታል?',       options: ['በጣም ጥሩ', 'ጥሩ', 'መካከለኛ', 'መጥፎ'] },
       { key: 'coffee',      label: 'የቡና ወይም የምግብ ጥራት እንዴት ነበር?',         options: ['በጣም ጥሩ', 'ጥሩ', 'መካከለኛ', 'መጥፎ'] },
-      { key: 'service',     label: 'አገልግሎቱ እንዴት ነበር?',                   options: ['ወዳጃዊ', 'መካከለኛ', 'ማሻሻል ያስፈልጋል'] },
+      { key: 'service',     label: 'አገልግሎቱ እንዴት ነበር?',                   options: ['ጥሩ', 'መካከለኛ', 'ማሻሻል ያስፈልጋል'] },
       { key: 'wait',        label: 'ትዕዛዝዎን ለመቀበል ምን ያህል ጊዜ ጠበቁ?',        options: ['ፈጣን', 'ተቀባይነት ያለው', 'በጣም ረጅም'] },
       { key: 'cleanliness', label: 'ካፌው ምን ያህል ንጹህ እና ምቹ ነበር?',          options: ['በጣም ንጹህ', 'ንጹህ', 'ማሻሻል ያስፈልጋል'] },
       { key: 'price',       label: 'ዋጋው ከጥራቱ ጋር ይዛመዳል ብለው ያስባሉ?',       options: ['አዎ', 'ተቀባይነት አለው', 'አይደለም'] },
@@ -52,7 +52,7 @@ const T = {
 
 const sentimentKeyMap = {
   'በጣም ጥሩ': 'Excellent', 'ጥሩ': 'Good', 'መካከለኛ': 'Average', 'መጥፎ': 'Poor',
-  'ወዳጃዊ': 'Friendly', 'ማሻሻል ያስፈልጋል': 'Needs Improvement',
+  'ጥሩ': 'Friendly', 'መካከለኛ': 'Okay', 'ማሻሻል ያስፈልጋል': 'Needs Improvement',
   'ፈጣን': 'Fast', 'ተቀባይነት ያለው': 'Acceptable', 'በጣም ረጅም': 'Too Long',
   'በጣም ንጹህ': 'Very Clean', 'ንጹህ': 'Clean',
   'አዎ': 'Yes', 'ተቀባይነት አለው': 'Fair', 'አይደለም': 'No', 'ምናልባት': 'Maybe',
